@@ -1,4 +1,4 @@
 kazoo>=1.2
-six
 requests
 flask
+PyYaml

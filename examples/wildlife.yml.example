@@ -1,0 +1,15 @@
+watermark_sleep: 10
+
+wildlife:
+  - cluster01
+  - cluster02
+
+clusters:
+  - name: cluster01
+    hosts: localhost:2181,localhost:2182
+    timeout: 10.0
+    randomize_hosts: True
+  - name: cluster02
+    hosts: localhost:2183,localhost:2184
+    timeout: 10.0
+    randomize_hosts: True
