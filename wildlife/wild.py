@@ -5,6 +5,7 @@ import threading
 import time
 from wildlife.wildutils import Config, Cluster
 from wildlife.manager import ClusterManager
+import six
 
 
 class WildLife(threading.Thread):
@@ -48,7 +49,11 @@ class WildLife(threading.Thread):
         # Interval between checking if new clusters added
         newconfig.watermark_sleep = config.get("watermark_sleep", 10)
 
-        newconfig.wildlife = set(config["wildlife"])
+        _wildlife = config["wildlife"]
+        if isinstance(_wildlife, six.string_types):
+            _wildlife = [_wildlife]
+        newconfig.wildlife = set(_wildlife)
+
         newconfig.clusters = dict()
         newconfig.managers = dict()
 

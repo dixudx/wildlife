@@ -2,3 +2,4 @@ kazoo>=1.2
 requests
 flask
 PyYaml
+six
