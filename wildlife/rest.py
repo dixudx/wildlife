@@ -20,22 +20,27 @@ def cluster_znode_exception(func):
     @functools.wraps(func)
     def wrapper(cluster_name, znode):
         try:
-            func(cluster_name, znode)
+            return func(cluster_name, znode)
         except (kz_exceptions.ConnectionClosedError,
                 kz_exceptions.ConnectionDropped,
                 kz_exceptions.ConnectionLoss,
                 kz_exceptions.ConnectionLossException):
                 return make_response("Connection Exception When Interacts "
-                                     "with Cluster %s.\n" % cluster_name,
+                                     "with Cluster [%s].\n" % cluster_name,
                                      408)
-        except kz_exceptions.NoNodeError:
-            return make_response("Cannot Find Znode %s in Cluster"
-                                 "%s.\n" % (znode, cluster_name),
+        except kz_exceptions.NoNodeException:
+            return make_response("Cannot Find Znode [%s] in Cluster"
+                                 "[%s].\n" % (znode, cluster_name),
                                  404)
         except kz_exceptions.InvalidACLException:
-            return make_response("Invalid ACLs on Accessing Znode %s in "
-                                 "Cluster %s.\n" % (znode, cluster_name),
+            return make_response("Invalid ACLs on Accessing Znode [%s] in "
+                                 "Cluster [%s].\n" % (znode, cluster_name),
                                  401)
+        except kz_exceptions.NoAuthException:
+            return make_response("Please Provide ACLs to Access Znode [%s] in "
+                                 "Cluster [%s].\n" % (znode, cluster_name),
+                                 401)
+
         except exceptions:
             return make_response("Unable to Handle this Request.\n",
                                  500)
