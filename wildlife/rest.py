@@ -1,6 +1,6 @@
 from wildlife import WildApp
 import os
-from flask import jsonify, make_response
+from flask import make_response, request, Response
 from wildlife import kz_exceptions
 import json
 import exceptions
@@ -43,7 +43,10 @@ def cluster_znode_exception(func):
             return make_response("Please Provide ACLs to Access Znode [%s] in "
                                  "Cluster [%s].\n" % (znode, cluster_name),
                                  401)
-
+        except kz_exceptions.ZookeeperError:
+            return make_response("ZooKeeper Server Error on Interacting with "
+                                 "Cluster [%s].\n" % cluster_name,
+                                 406)
         except exceptions:
             return make_response("Unable to Handle this Request.\n",
                                  500)
@@ -62,8 +65,13 @@ def hello():
 def clusters():
     """get all clusters"""
 
-    return make_response(jsonify({"clusters": app.clusters.keys()}),
-                         200)
+    data = {"clusters": app.clusters.keys()}
+
+    resp = Response(json.dumps(data),
+                    status=200,
+                    mimetype="application/json")
+
+    return resp
 
 
 @app.route("/wildlife/<cluster_name>", methods=["GET"],
@@ -75,36 +83,93 @@ def detail_cluster(cluster_name, znode):
     _cluster_info = dict()
     _cluster_info.update(app.clusters[cluster_name].__dict__)
     _cluster_info["connection"] = app.managers[cluster_name]._client.state
-    return make_response(jsonify(_cluster_info),
-                         200)
+    resp = Response(json.dumps(_cluster_info),
+                    status=200,
+                    mimetype="application/json")
+    return resp
 
 
-@app.route("/wildlife/<cluster_name>/<znode>", methods=["GET"])
+@app.route("/wildlife/<cluster_name>", methods=["POST"],
+           defaults={"znode": None})
 @cluster_znode_exception
-def cluster_znode(cluster_name, znode):
-    """get the znode data including the znodeStat"""
+def cluster_create_znode(cluster_name, znode):
+    """create a znode in a specific cluster"""
 
     _zclient_manager = app.managers[cluster_name]
     _zclient = _zclient_manager._client
-    zdata = _zclient.get(znode)
-    return make_response(jsonify({"data": zdata[0],
-                                  "znodeStat": convert_zstat(zdata[1])
-                                  }),
-                         200)
+    data = request_data(request)
+    real_path_list = list()
+    for (_znode, _zdata) in data.items():
+        print _znode, _zdata
+        _znodepath = _zclient.create(_znode, value=bytes(_zdata),
+                                     makepath=True, acl=None,
+                                     ephemeral=False,
+                                     sequence=False)
+        real_path_list.append(_znodepath)
+    resp = Response(str(real_path_list),
+                    status=200,
+                    mimetype="text/plain")
+    return resp
 
 
-@app.route("/wildlife/<cluster_name>/<znode>/data", methods=["GET"])
+@app.route("/wildlife/<cluster_name>/list", methods=["GET"],
+           defaults={"znode": None})
+@cluster_znode_exception
+def cluster_list_children(cluster_name, znode):
+    """get the basic information of a specific cluster"""
+
+    return cluster_znode_children(cluster_name, "/")
+
+
+@app.route("/wildlife/<cluster_name>/<path:znode>",
+           methods=["GET", "PUT", "DELETE"])
+@cluster_znode_exception
+def cluster_znode(cluster_name, znode):
+    """get the znode data including the znodeStat, update the znode data
+    and delete the znode"""
+
+    _zclient_manager = app.managers[cluster_name]
+    _zclient = _zclient_manager._client
+    if request.method == "GET":
+        zdata = _zclient.get(znode)
+        data = {"data": zdata[0],
+                "znodeStat": convert_zstat(zdata[1])}
+        resp = Response(json.dumps(data),
+                        status=200,
+                        mimetype="application/json")
+        return resp
+    elif request.method == "PUT":
+        _new_data = request_data(request)
+        zdata = _zclient.set(znode, _new_data)
+        data = {"data": _new_data,
+                "znodeStat": convert_zstat(zdata)}
+        resp = Response(json.dumps(data),
+                        status=201,
+                        mimetype="application/json")
+        return resp
+    else:
+        _zclient.delete(znode, recursive=False)
+        return make_response("Successfully Delete Znode [%s] from "
+                             "Cluster [%s].\n" % (znode, cluster_name),
+                             202)
+
+
+@app.route("/wildlife/<cluster_name>/<path:znode>/data", methods=["GET"])
 @cluster_znode_exception
 def cluster_znode_data(cluster_name, znode):
     """get only the data of a znode in a specific cluster"""
 
-    zdata = cluster_znode(cluster_name, znode)
-    zdata = json.loads(zdata)
-    return make_response(zdata["data"],
-                         200)
+    print cluster_name, znode
+
+    zdata_resp = cluster_znode(cluster_name, znode)
+    zdata = json.loads(zdata_resp.get_data())
+    resp = Response(zdata["data"],
+                    status=200,
+                    mimetype="text/plain")
+    return resp
 
 
-@app.route("/wildlife/<cluster_name>/<znode>/children", methods=["GET"])
+@app.route("/wildlife/<cluster_name>/<path:znode>/children", methods=["GET"])
 @cluster_znode_exception
 def cluster_znode_children(cluster_name, znode):
     """get the children of a znode in a specific cluster"""
@@ -114,6 +179,26 @@ def cluster_znode_children(cluster_name, znode):
     zchildren = _zclient.get_children(znode)
     return make_response(str(zchildren),
                          200)
+
+
+def request_data(request):
+    if request.content_type == "application/x-www-form-urlencoded":
+        data = request.form
+    elif "multipart/form-data" in request.content_type:
+        data = request.form
+    elif request.content_type == "text/plain;charset=UTF-8":
+        data = request.data
+    elif request.content_type == "application/json":
+        data = request.json
+        print "application/json"
+    elif request.content_type == "text/xml":
+        data = request.data
+    else:
+        data = request.data
+
+    if not data:
+        return "".join(request.environ["wsgi.input"].readlines())
+    return data
 
 
 def convert_zstat(znodestat):
