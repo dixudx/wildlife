@@ -100,7 +100,6 @@ def cluster_create_znode(cluster_name, znode):
     data = request_data(request)
     real_path_list = list()
     for (_znode, _zdata) in data.items():
-        print _znode, _zdata
         _znodepath = _zclient.create(_znode, value=bytes(_zdata),
                                      makepath=True, acl=None,
                                      ephemeral=False,
@@ -159,8 +158,6 @@ def cluster_znode(cluster_name, znode):
 def cluster_znode_data(cluster_name, znode):
     """get only the data of a znode in a specific cluster"""
 
-    print cluster_name, znode
-
     zdata_resp = cluster_znode(cluster_name, znode)
     zdata = json.loads(zdata_resp.get_data())
     resp = Response(zdata["data"],
@@ -190,7 +187,6 @@ def request_data(request):
         data = request.data
     elif request.content_type == "application/json":
         data = request.json
-        print "application/json"
     elif request.content_type == "text/xml":
         data = request.data
     else:
