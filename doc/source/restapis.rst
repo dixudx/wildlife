@@ -1,5 +1,8 @@
+.. _restapis:
+
 REST APIs
 =========
+
 
 - `GET`
 

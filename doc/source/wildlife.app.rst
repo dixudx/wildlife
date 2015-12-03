@@ -1,12 +1,9 @@
-.. _wildlife_wildlifeapp:
+.. _wildlife_app:
 
 wildlife.app
 ============
 
+
 .. automodule:: wildlife.app
     :members:
     :show-inheritance:
-
-.. autoclass:: wildlife.app.WildApp
-   :members:
-   :show-inheritance:

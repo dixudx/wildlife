@@ -1,7 +1,8 @@
-.. _wildlife_wildliferest:
+.. _wildlife_rest:
 
 wildlife.rest
 =============
+
 
 .. automodule:: wildlife.rest
     :members:

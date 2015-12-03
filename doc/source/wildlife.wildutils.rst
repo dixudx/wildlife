@@ -1,7 +1,8 @@
-.. _wildlife_wildlifeutils:
+.. _wildlife_utils:
 
 wildlife.wildutils
 ==================
+
 
 .. automodule:: wildlife.wildutils
     :members:
