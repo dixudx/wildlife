@@ -55,15 +55,66 @@ def cluster_znode_exception(func):
 
 @app.route("/")
 def hello():
-    """hello"""
+    """This is the hello page on wildlife REST APIs usages
 
-    return make_response("Welcome to WildLife: The REST API for ZooKeeper!\n",
-                         200)
+    ``GET``
+        get all clusters info: \
+        http://[host]:[port]/wildlife
+
+        get the basic information of a specific cluster: \
+        http://[host]:[port]/wildlife/[cluster_name]
+
+        get the root children of a specific cluster: \
+        http://[host]:[port]/wildlife/[cluster_name]/list
+
+        get the znode data including the znodeStat: \
+        http://[host]:[port]/wildlife/[cluster_name]/[znode]
+        e.g. http://localhost:5000/wildlife/cluster01/znode1/znode2/znode3
+
+        get the children of a znode in a specific cluster: \
+        http://[host]:[port]/wildlife/[cluster_name]/[znode]/children
+        e.g. http://localhost:5000/wildlife/cluster01/znode1/znode2/children
+
+        get only the data of a znode in a specific cluster: \
+        http://[host]:[port]/wildlife/[cluster_name]/[znode]/data
+        e.g. http://localhost:5000/wildlife/cluster01/znode1/znode2/znode3/data
+
+    ``POST``
+        create a znode in a specific cluster: \
+        http://[host]:[port]/wildlife/[cluster_name]
+
+
+    ``PUT``
+        update the znode data: \
+        http://[host]:[port]/wildlife/[cluster_name]/[znode]
+
+    ``DELETE``
+        delete the znode: \
+        http://[host]:[port]/wildlife/[cluster_name]/[znode]
+
+    """
+
+    usage_msg = "\n".join(["Welcome to WildLife: The REST APIs for "
+                           "ZooKeeper!\n",
+                           hello.__doc__])
+
+    return make_response(usage_msg, 200)
 
 
 @app.route("/wildlife", methods=["GET"])
 def clusters():
-    """get all clusters"""
+    """get all clusters
+
+    ``GET`` http://[host]:[port]/wildlife
+
+    ``Response`` (json data):
+        {
+
+         "clusters": [cluster_list]
+
+        }
+
+    """
 
     data = {"clusters": app.clusters.keys()}
 
@@ -78,7 +129,25 @@ def clusters():
            defaults={"znode": None})
 @cluster_znode_exception
 def detail_cluster(cluster_name, znode):
-    """get the basic information of a specific cluster"""
+    """get the basic information of a specific cluster
+
+    ``GET`` http://[host]:[port]/wildlife/[cluster_name]
+
+    ``Response`` (json data):
+        {
+
+         "read_only": null,
+         "auth_data": null,
+         "connection": "CONNECTED",
+         "hosts": "10.x.xx.xxx:2181,10.x.xx.xxx:2182",
+         "name": "cluster01",
+         "timeout": 10.0,
+         "randomize_hosts": true,
+         "default_acl": null
+
+        }
+
+    """
 
     _cluster_info = dict()
     _cluster_info.update(app.clusters[cluster_name].__dict__)
@@ -93,7 +162,24 @@ def detail_cluster(cluster_name, znode):
            defaults={"znode": None})
 @cluster_znode_exception
 def cluster_create_znode(cluster_name, znode):
-    """create a znode in a specific cluster"""
+    """create a znode in a specific cluster
+
+    ``POST`` http://[host]:[port]/wildlife/[cluster_name]
+
+    ``Content-Type``: "application/json" or "multipart/form-data"
+
+    ``DATA``:
+        {
+
+         "znode_path1": "znode_data1",
+         "znode_path2": "znode_data2"
+
+        }
+
+    ``Response`` (string):
+        [created_znode_path_list]
+
+    """
 
     _zclient_manager = app.managers[cluster_name]
     _zclient = _zclient_manager._client
@@ -115,7 +201,14 @@ def cluster_create_znode(cluster_name, znode):
            defaults={"znode": None})
 @cluster_znode_exception
 def cluster_list_children(cluster_name, znode):
-    """get the basic information of a specific cluster"""
+    """get the root children of a specific cluster
+
+    ``GET`` http://[host]:[port]/wildlife/[cluster_name]/list
+
+    ``Response`` (string):
+        [children_list]
+
+    """
 
     return cluster_znode_children(cluster_name, "/")
 
@@ -125,7 +218,75 @@ def cluster_list_children(cluster_name, znode):
 @cluster_znode_exception
 def cluster_znode(cluster_name, znode):
     """get the znode data including the znodeStat, update the znode data
-    and delete the znode"""
+    and delete the znode
+
+    ``GET`` http://[host]:[port]/wildlife/[cluster_name]/[znode]
+
+    e.g. http://localhost:5000/wildlife/cluster01/znode1/znode2/znode3
+
+    ``Response`` (json data):
+        {
+
+         "znodeStat":
+            {
+
+             "ephemeralOwner": 0,
+             "dataLength": 19,
+             "mtime": 1448608198011,
+             "czxid": 8589936224,
+             "pzxid": 8589936224,
+             "ctime": 1448608198011,
+             "mzxid": 8589936224,
+             "numChildren": 0,
+             "version": 0,
+             "aversion": 0,
+             "cversion": 0
+
+            },
+
+         "data": "data for this znode"
+
+        }
+
+
+    ``PUT`` http://[host]:[port]/wildlife/[cluster_name]/[znode]
+
+    ``Content-Type``: "text/plain;charset=UTF-8", "application/json",
+        "text/xml" or "multipart/form-data"
+
+    ``DATA``
+
+    ``Response`` (json data):
+        {
+
+         "znodeStat":
+            {
+
+             "ephemeralOwner": 0,
+             "dataLength": 27,
+             "mtime": 1449033225435,
+             "czxid": 8589936438,
+             "pzxid": 8589936439,
+             "ctime": 1449033225435,
+             "mzxid": 8589936438,
+             "numChildren": 0,
+             "version": 0,
+             "aversion": 0,
+             "cversion": 1
+
+            },
+
+         "data": "updated data for this znode"
+
+        }
+
+
+    ``DELETE`` http://[host]:[port]/wildlife/[cluster_name]/[znode]
+
+    ``Response`` (string):
+        Successfully Delete Znode [znode] from Cluster [cluster_name].
+
+    """
 
     _zclient_manager = app.managers[cluster_name]
     _zclient = _zclient_manager._client
@@ -156,7 +317,17 @@ def cluster_znode(cluster_name, znode):
 @app.route("/wildlife/<cluster_name>/<path:znode>/data", methods=["GET"])
 @cluster_znode_exception
 def cluster_znode_data(cluster_name, znode):
-    """get only the data of a znode in a specific cluster"""
+    """get only the data of a znode in a specific cluster
+
+
+    ``GET`` http://[host]:[port]/wildlife/[cluster_name]/[znode]/data
+
+    e.g. http://localhost:5000/wildlife/cluster01/znode1/znode2/znode3/data
+
+    ``Response`` (string):
+        data for this znode
+
+    """
 
     zdata_resp = cluster_znode(cluster_name, znode)
     zdata = json.loads(zdata_resp.get_data())
@@ -169,7 +340,16 @@ def cluster_znode_data(cluster_name, znode):
 @app.route("/wildlife/<cluster_name>/<path:znode>/children", methods=["GET"])
 @cluster_znode_exception
 def cluster_znode_children(cluster_name, znode):
-    """get the children of a znode in a specific cluster"""
+    """get the children of a znode in a specific cluster
+
+    ``GET`` http://[host]:[port]/wildlife/[cluster_name]/[znode]/children
+
+    e.g. http://localhost:5000/wildlife/cluster01/znode1/znode2/children
+
+    ``Response`` (string):
+        [children_list]
+
+    """
 
     _zclient_manager = app.managers[cluster_name]
     _zclient = _zclient_manager._client
@@ -216,4 +396,4 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG,
                         format='%(asctime)s %(levelname)s %(name)s: '
                                '(%(threadName)-10s) %(message)s')
-    app.run(host="0.0.0.0")
+    app.run(host="localhost")

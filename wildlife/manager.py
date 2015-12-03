@@ -4,6 +4,7 @@ import logging
 
 
 class ClusterManager(threading.Thread):
+
     log = logging.getLogger("wildlife.ClusterManager")
 
     def __init__(self, cluster):
