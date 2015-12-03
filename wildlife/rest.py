@@ -94,9 +94,9 @@ def hello():
 
     """
 
-    usage_msg = "\n".join(["Welcome to WildLife: The REST APIs for "
-                           "ZooKeeper!\n",
-                           hello.__doc__])
+    usage_msg = "<br/>".join(["Welcome to WildLife: The REST APIs for "
+                              "ZooKeeper!<br/>",
+                              hello.__doc__.replace("\n", "<br/>")])
 
     return make_response(usage_msg, 200)
 

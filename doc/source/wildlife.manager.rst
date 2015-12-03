@@ -1,8 +1,9 @@
-.. _wildlife_wildlifemanager:
+.. _wildlife_manager:
 
 wildlife.manager
 ================
 
-.. automodule:: wildlife.manager
+
+.. autoclass:: wildlife.manager.ClusterManager
     :members:
     :show-inheritance:

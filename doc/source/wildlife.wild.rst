@@ -1,4 +1,4 @@
-.. _wildlife_wildlifewild:
+.. _wildlife_wild:
 
 wildlife.wild
 =============

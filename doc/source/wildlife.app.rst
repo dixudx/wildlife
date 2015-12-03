@@ -1,7 +1,8 @@
-.. _wildlife_wildlifeapp:
+.. _wildlife_app:
 
 wildlife.app
 ============
+
 
 .. automodule:: wildlife.app
     :members:
