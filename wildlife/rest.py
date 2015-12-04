@@ -397,9 +397,14 @@ def convert_zstat(znodestat):
             "pzxid": znodestat.pzxid}
 
 
+def main(host="localhost"):
+    app._startWild()
+    app.run(host=host)
+
+
 if __name__ == "__main__":
     import logging
     logging.basicConfig(level=logging.DEBUG,
                         format='%(asctime)s %(levelname)s %(name)s: '
                                '(%(threadName)-10s) %(message)s')
-    app.run(host="localhost")
+    main(host="localhost")
