@@ -26,18 +26,16 @@ class WildApp(Flask):
                              instance_path=instance_path,
                              instance_relative_config=instance_relative_config)
         self.conf_path = conf_path
-        self._startWild()
-        try:
-            self.managers = self.wild.config.managers
-            self.clusters = self.wild.config.clusters
-        except Exception:
-            self.log.error("Wrong Configuration.")
+        self.managers = None
+        self.clusters = None
 
     def _startWild(self):
         self.log.debug("Start WildLife")
         self.wild = WildLife(self.conf_path)
         try:
             self.wild.updateConfig()
+            self.managers = self.wild.config.managers
+            self.clusters = self.wild.config.clusters
         except IOError:
             self.log.error("Unable to find configuration file "
                            "%s" % self.conf_path)
