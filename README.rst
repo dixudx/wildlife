@@ -7,21 +7,22 @@ wildlife
 .. image:: https://api.travis-ci.org/dixudx/wildlife.svg?branch=master
     :target: https://github.com/dixudx/wildlife
 
+.. image:: https://api.travis-ci.org/dixudx/wildlife.svg?branch=master
+    :target: https://pypi.python.org/pypi/wildlife
 
-A Flask-based Server Interface to Provide REST APIs for `Apache Zookeeper`_
+A Flask-based Server Interface to Provide **REST APIs** for `Apache Zookeeper`_
 
 
 About This Project
 ------------------
 
 This project wildlife (I got this name inspired from the meaning of
-`Apache ZooKeeper`_), is a server interface, providing REST APIs for
+`Apache ZooKeeper`_), is a server interface, providing **REST APIs** for
 `Apache ZooKeeper`_.
 
 This project now can help you:
 
-* Provide REST APIs (including GET/PUT/POST/DELETE) for other micro-services
-that utilize ZooKeeper cluster for configuration;
+* Provide REST APIs (including **GET**/**PUT**/**POST**/**DELETE**) for other micro-services that utilize ZooKeeper cluster for configuration;
 
 * Access all your ZooKeeper Clusters in one portal;
 
@@ -42,11 +43,28 @@ Project documentation: https://readthedocs.org/projects/wildlife/
 How to Use & Configure
 ----------------------
 
-pass
+To **install wildlife**, simply run:
+
+.. code-block:: bash
+
+    $ git clone https://github.com/dixudx/wildlife
+    $ cd wildlife
+    $ python setup.py install
+
+To **configure wildlife**, simply:
+
+.. code-block:: bash
+
+    $ cd /{your-site-packages}/wildlife/config
+    $ cp wildlife.yml.example wildlife.yml
+
+And then modify your configurations accordingly.
 
 
 REST APIs
 ---------
+
+For more detailed inforamtion, please visit http://wildlife.readthedocs.org/en/latest/restapis.html
 
 - `GET`
 

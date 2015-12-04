@@ -407,4 +407,4 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG,
                         format='%(asctime)s %(levelname)s %(name)s: '
                                '(%(threadName)-10s) %(message)s')
-    main(host="localhost")
+    main(host="0.0.0.0")

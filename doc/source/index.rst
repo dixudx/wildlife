@@ -6,14 +6,69 @@
 Welcome to wildlife's documentation!
 ====================================
 
-Public REST APIs:
+A Flask-based Server Interface to Provide **REST APIs** for `Apache Zookeeper`_
+
+
+About This Project
+------------------
+
+This project wildlife (I got this name inspired from the meaning of
+`Apache ZooKeeper`_), is a server interface, providing **REST APIs** for
+`Apache ZooKeeper`_.
+
+This project now can help you:
+
+* Provide REST APIs (including **GET**/**PUT**/**POST**/**DELETE**) for other micro-services that utilize ZooKeeper cluster for configuration;
+
+* Access all your ZooKeeper Clusters in one portal;
+
+.. _Apache ZooKeeper: https://zookeeper.apache.org/
+
+
+Important Links
+---------------
+
+Support and bug-reports:
+https://github.com/dixudx/wildlife/issues?q=is%3Aopen+sort%3Acomments-desc
+
+Project source code: https://github.com/dixudx/wildlife
+
+Project documentation: https://readthedocs.org/projects/wildlife/
+
+
+How to Use & Configure
+----------------------
+
+To **install wildlife**, simply run:
+
+.. code-block:: bash
+
+    $ git clone https://github.com/dixudx/wildlife
+    $ cd wildlife
+    $ python setup.py install
+
+To **configure wildlife**, simply run:
+
+.. code-block:: bash
+
+    $ cd /{your-site-packages}/wildlife/config
+    $ cp wildlife.yml.example wildlife.yml
+    $ vim wildlife.yml
+
+And then modify your configurations accordingly.
+
+
+Public REST APIs
+----------------
 
 .. toctree::
    :maxdepth: 2
 
    restapis
 
-API Documentation:
+
+API Documentation
+-----------------
 
 .. toctree::
    :maxdepth: 2
