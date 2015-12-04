@@ -31,9 +31,9 @@ class WildLife(threading.Thread):
         while not self._stopped:
             try:
                 self.updateConfig()
+                time.sleep(self.config.watermark_sleep)
             except Exception:
                 self.log.exception("Exception in WildLife Loop")
-            time.sleep(self.config.watermark_sleep)
 
     def loadConfig(self):
         self.log.debug("Loading configuration from %s", self.path)
@@ -111,6 +111,7 @@ class WildLife(threading.Thread):
         self.config = config
 
     def reconfigureManagers(self, config):
+        self.log.debug("Reconfigure the managers for ZooKeeper Cluster.")
         stop_managers = []
         for manager in config.clusters.values():
             oldmanager = None
