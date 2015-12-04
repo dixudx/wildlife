@@ -57,7 +57,11 @@ def cluster_znode_exception(func):
 def hello():
     """This is the hello page on wildlife REST APIs usages
 
+
     ``GET``
+        hello page on wildlife REST APIs usages: \
+        http://[host]:[port]
+
         get all clusters info: \
         http://[host]:[port]/wildlife
 
@@ -79,6 +83,7 @@ def hello():
         http://[host]:[port]/wildlife/[cluster_name]/[znode]/data
         e.g. http://localhost:5000/wildlife/cluster01/znode1/znode2/znode3/data
 
+
     ``POST``
         create a znode in a specific cluster: \
         http://[host]:[port]/wildlife/[cluster_name]
@@ -88,15 +93,16 @@ def hello():
         update the znode data: \
         http://[host]:[port]/wildlife/[cluster_name]/[znode]
 
+
     ``DELETE``
         delete the znode: \
         http://[host]:[port]/wildlife/[cluster_name]/[znode]
 
     """
 
-    usage_msg = "<br/>".join(["Welcome to WildLife: The REST APIs for "
-                              "ZooKeeper!<br/>",
-                              hello.__doc__.replace("\n", "<br/>")])
+    usage_msg = "<br/>\n".join(["Welcome to WildLife: The REST APIs for "
+                                "ZooKeeper!<br/>",
+                                hello.__doc__.replace("\n", "<br/>\n")])
 
     return make_response(usage_msg, 200)
 

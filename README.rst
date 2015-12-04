@@ -18,13 +18,31 @@ This project wildlife (I got this name inspired from the meaning of
 `Apache ZooKeeper`_), is a server interface, providing REST APIs for
 `Apache ZooKeeper`_.
 
+This project now can help you:
 
+* Provide REST APIs (including GET/PUT/POST/DELETE) for other micro-services
+that utilize ZooKeeper cluster for configuration;
 
-This project can help you:
-
-
+* Access all your ZooKeeper Clusters in one portal;
 
 .. _Apache ZooKeeper: https://zookeeper.apache.org/
+
+
+Important Links
+---------------
+
+Support and bug-reports:
+https://github.com/dixudx/wildlife/issues?q=is%3Aopen+sort%3Acomments-desc
+
+Project source code: https://github.com/dixudx/wildlife
+
+Project documentation: https://readthedocs.org/projects/wildlife/
+
+
+How to Use & Configure
+----------------------
+
+pass
 
 
 REST APIs
