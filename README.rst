@@ -7,9 +7,6 @@ wildlife
 .. image:: https://api.travis-ci.org/dixudx/wildlife.svg?branch=master
     :target: https://github.com/dixudx/wildlife
 
-.. image:: https://api.travis-ci.org/dixudx/wildlife.svg?branch=master
-    :target: https://pypi.python.org/pypi/wildlife
-
 A Flask-based Server Interface to Provide **REST APIs** for `Apache Zookeeper`_
 
 
