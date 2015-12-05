@@ -40,3 +40,8 @@ class WildApp(Flask):
             self.log.error("Unable to find configuration file "
                            "%s" % self.conf_path)
         self.wild.start()
+
+    def _stopWild(self):
+        self.log.debug("Stop WildLife")
+        self.wild = WildLife(self.conf_path)
+        self.wild.stop()
