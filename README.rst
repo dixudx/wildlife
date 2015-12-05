@@ -13,7 +13,7 @@ A Flask-based Server Interface to Provide **REST APIs** for `Apache Zookeeper`_
 About This Project
 ------------------
 
-This project wildlife (I got this name inspired from the meaning of
+This project **wildlife** (I got this name inspired from the meaning of
 `Apache ZooKeeper`_), is a server interface, providing **REST APIs** for
 `Apache ZooKeeper`_.
 
@@ -40,7 +40,7 @@ Project documentation: https://readthedocs.org/projects/wildlife/
 How to Use & Configure
 ----------------------
 
-To **install wildlife**, simply run:
+To **install** wildlife, simply run:
 
 .. code-block:: bash
 
@@ -48,7 +48,7 @@ To **install wildlife**, simply run:
     $ cd wildlife
     $ python setup.py install
 
-To **configure wildlife**, simply:
+To **configure** wildlife, simply:
 
 .. code-block:: bash
 
@@ -57,6 +57,12 @@ To **configure wildlife**, simply:
 
 And then modify your configurations accordingly.
 
+After the configuration, you can **start** wildlife journey by running:
+
+.. code-block:: bash
+
+    $ python rest.py
+
 
 REST APIs
 ---------
@@ -64,6 +70,10 @@ REST APIs
 For more detailed inforamtion, please visit http://wildlife.readthedocs.org/en/latest/restapis.html
 
 - `GET`
+
+    - hello page on wildlife REST APIs usages:
+
+      http://[host]:[port]
 
     - get all clusters info:
 
