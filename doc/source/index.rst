@@ -64,6 +64,14 @@ After the configuration, you can **start** wildlife journey by running:
     $ python rest.py
 
 
+Important Notice
+----------------
+
+Please do `NOT` use "**list**", "**data**", "**children" and "**acls**"
+as znodes names, which have been preserved for the REST APIs usage and may
+result in conflicts if using.
+
+
 Public REST APIs
 ----------------
 
