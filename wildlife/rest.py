@@ -5,6 +5,8 @@ from wildlife import kz_exceptions
 import json
 import exceptions
 import functools
+from kazoo.security import make_acl
+from wildlife import wildutils
 
 
 # change to current directory
@@ -47,8 +49,9 @@ def cluster_znode_exception(func):
             return make_response("ZooKeeper Server Error on Interacting with "
                                  "Cluster [%s].\n" % cluster_name,
                                  406)
-        except exceptions:
-            return make_response("Unable to Handle this Request.\n",
+        except exceptions as excp:
+            return make_response("Unable to Handle this Request with "
+                                 "exception: %s.\n" % excp,
                                  500)
     return wrapper
 
@@ -299,7 +302,7 @@ def cluster_znode(cluster_name, znode):
     if request.method == "GET":
         zdata = _zclient.get(znode)
         data = {"data": zdata[0],
-                "znodeStat": convert_zstat(zdata[1])}
+                "znodeStat": wildutils.convert_zstat(zdata[1])}
         resp = Response(json.dumps(data),
                         status=200,
                         mimetype="application/json")
@@ -308,16 +311,104 @@ def cluster_znode(cluster_name, znode):
         _new_data = request_data(request)
         zdata = _zclient.set(znode, _new_data)
         data = {"data": _new_data,
-                "znodeStat": convert_zstat(zdata)}
+                "znodeStat": wildutils.convert_zstat(zdata)}
         resp = Response(json.dumps(data),
                         status=201,
                         mimetype="application/json")
         return resp
-    else:
+    elif request.method == "DELETE":
         _zclient.delete(znode, recursive=False)
         return make_response("Successfully Delete Znode [%s] from "
                              "Cluster [%s].\n" % (znode, cluster_name),
                              202)
+
+@app.route("/wildlife/<cluster_name>/<path:znode>/acls",
+           methods=["GET", "PUT"])
+@cluster_znode_exception
+def cluster_znode_acls(cluster_name, znode):
+    """get or update the acls of a znode in a specific cluster
+
+
+    ``GET`` http://[host]:[port]/wildlife/[cluster_name]/[znode]/acls
+
+    e.g. http://localhost:5000/wildlife/cluster01/znode1/znode2/znode3/acls
+
+    ``Response`` (string):
+        [ACL(perms=31, acl_list=['ALL'], id=Id(scheme=u'world', id=u'anyone'))]
+
+
+    ``PUT`` http://[host]:[port]/wildlife/[cluster_name]/[znode]/acls
+
+    ``Content-Type``: "text/plain" or "text/xml"
+
+    ``DATA``:
+
+        [
+         {"scheme": "digest",
+          "credential": "user1,password1",
+          "read": True,
+          "write": False,
+          "create": False,
+          "delete": False,
+          "admin": False,
+          "all": False
+         },
+         {"scheme": "digest",
+          "credential": "user2,password2",
+          "all": True
+         }
+        ]
+
+    Parameters Explanations:
+        scheme: The scheme to use. I.e. digest.
+        credential: A colon separated username, password.
+            The password should be hashed with the scheme specified.
+        write (bool): Write permission.
+        create (bool): Create permission.
+        delete (bool): Delete permission.
+        admin (bool): Admin permission.
+        all (bool): All permissions.
+
+    ``Response`` (string):
+        [created_znode_path_list]
+
+    """
+
+    _zclient_manager = app.managers[cluster_name]
+    _zclient = _zclient_manager._client
+    if request.method == "GET":
+        acls = _zclient.get_acls(znode)[0]
+        return make_response(str(acls),
+                             200)
+
+    if request.method == "PUT":
+        if request.content_type not in ["text/plain", "text/xml"]:
+            return make_response("The Content-Type is not supported. "
+                                 "Please use text/plain or text/xml. \n",
+                                 406)
+        else:
+            acls_raw = eval(request.data)
+            acls_list = list()
+            for _acl_raw in acls_raw:
+                _scheme = _acl_raw.get("scheme")
+                _credential = _acl_raw.get("credential")
+                _read = wildutils.get_bool(_acl_raw.get("read", False))
+                _write = wildutils.get_bool(_acl_raw.get("write", False))
+                _create = wildutils.get_bool(_acl_raw.get("create", False))
+                _delete = wildutils.get_bool(_acl_raw.get("delete", False))
+                _all = wildutils.get_bool(_acl_raw.get("all", False))
+
+                _acl = make_acl(_scheme, _credential, read=_read,
+                                write=_write, create=_create,
+                                delete=_delete, all=_all)
+                acls_list.append(_acl)
+
+            zstat = _zclient.set_acls(znode, acls_list)
+            data = {"znodeStat": wildutils.convert_zstat(zstat)}
+            resp = Response(json.dumps(data),
+                            status=201,
+                            mimetype="application/json")
+            return resp
 
 
 @app.route("/wildlife/<cluster_name>/<path:znode>/data", methods=["GET"])
@@ -369,7 +460,7 @@ def request_data(request):
         data = request.form
     elif "multipart/form-data" in request.content_type:
         data = request.form
-    elif request.content_type == "text/plain;charset=UTF-8":
+    elif request.content_type == "text/plain":
         data = request.data
     elif request.content_type == "application/json":
         data = request.json
@@ -381,20 +472,6 @@ def request_data(request):
     if not data:
         return "".join(request.environ["wsgi.input"].readlines())
     return data
-
-
-def convert_zstat(znodestat):
-    return {"czxid": znodestat.czxid,
-            "mzxid": znodestat.mzxid,
-            "ctime": znodestat.ctime,
-            "mtime": znodestat.mtime,
-            "version": znodestat.version,
-            "cversion": znodestat.cversion,
-            "aversion": znodestat.aversion,
-            "ephemeralOwner": znodestat.ephemeralOwner,
-            "dataLength": znodestat.dataLength,
-            "numChildren": znodestat.numChildren,
-            "pzxid": znodestat.pzxid}
 
 
 def main(host="localhost"):

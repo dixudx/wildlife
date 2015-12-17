@@ -91,6 +91,10 @@ For more detailed inforamtion, please visit http://wildlife.readthedocs.org/en/l
 
       http://[host]:[port]/wildlife/[cluster_name]
 
+    - get the acls of a znode in a specific cluster:
+
+      http://[host]:[port]wildlife/<cluster_name>/<path:znode>/acls
+
     - get the root children of a specific cluster:
 
       http://[host]:[port]/wildlife/[cluster_name]/list
@@ -120,6 +124,10 @@ For more detailed inforamtion, please visit http://wildlife.readthedocs.org/en/l
       http://[host]:[port]/wildlife/[cluster_name]
 
 - `PUT`
+
+    - update the acls of a znode in a specific cluster:
+
+      http://[host]:[port]wildlife/<cluster_name>/<path:znode>/acls
 
     - update the znode data:
 

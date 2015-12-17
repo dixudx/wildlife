@@ -21,6 +21,11 @@ REST APIs
 
       http://[host]:[port]/wildlife/[cluster_name]
 
+    - get the acls of a znode in a specific cluster(see `rest.cluster_znode_acls
+      <./wildlife.rest.html#wildlife.rest.cluster_znode_acls>`_ for more details):
+
+      http://[host]:[port]wildlife/<cluster_name>/<path:znode>/acls
+
     - get the root children of a specific cluster(see `rest.cluster_list_children
       <./wildlife.rest.html#wildlife.rest.cluster_list_children>`_ for  more details):
 
@@ -56,12 +61,19 @@ REST APIs
 
 - `PUT`
 
-    - update the znode data(see `rest.cluster_znode`_ for more details):
+    - update the acls of a znode in a specific cluster(see `rest.cluster_znode_acls
+      <./wildlife.rest.html#wildlife.rest.cluster_znode_acls>`_ for more details):
+
+      http://[host]:[port]wildlife/<cluster_name>/<path:znode>/acls
+
+    - update the znode data(see `rest.cluster_znode
+      <./wildlife.rest.html#wildlife.rest.cluster_znode>`_ for more details):
 
       http://[host]:[port]/wildlife/[cluster_name]/[znode]
 
 - `DELETE`
 
-    - delete the znode(see `rest.cluster_znode`_ for more details):
+    - delete the znode(see `rest.cluster_znode
+      <./wildlife.rest.html#wildlife.rest.cluster_znode>`_ for more details):
 
       http://[host]:[port]/wildlife/[cluster_name]/[znode]
