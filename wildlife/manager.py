@@ -22,9 +22,7 @@ class ClusterManager(threading.Thread):
         self.log.debug("Get KazooClient for %s" % self.name)
         return KazooClient(hosts=self.cluster.hosts,
                            timeout=self.cluster.timeout,
-                           default_acl=self.cluster.default_acl,
                            auth_data=self.cluster.auth_data,
-                           read_only=self.cluster.read_only,
                            randomize_hosts=self.cluster.randomize_hosts,
                            logger=self.log)
 
