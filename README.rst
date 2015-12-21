@@ -91,10 +91,6 @@ For more detailed inforamtion, please visit http://wildlife.readthedocs.org/en/l
 
       http://[host]:[port]/wildlife/[cluster_name]
 
-    - get the acls of a znode in a specific cluster:
-
-      http://[host]:[port]wildlife/<cluster_name>/<path:znode>/acls
-
     - get the root children of a specific cluster:
 
       http://[host]:[port]/wildlife/[cluster_name]/list
@@ -104,6 +100,10 @@ For more detailed inforamtion, please visit http://wildlife.readthedocs.org/en/l
       http://[host]:[port]/wildlife/[cluster_name]/[znode]
 
       e.g. http://localhost:5000/wildlife/cluster01/znode1/znode2/znode3
+
+    - get the acls of a znode in a specific cluster:
+
+      http://[host]:[port]wildlife/[cluster_name]/[znode]/acls
 
     - get the children of a znode in a specific cluster:
 

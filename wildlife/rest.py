@@ -78,6 +78,9 @@ def hello():
         http://[host]:[port]/wildlife/[cluster_name]/[znode]
         e.g. http://localhost:5000/wildlife/cluster01/znode1/znode2/znode3
 
+        get the acls of a znode in a specific cluster: \
+        http://[host]:[port]wildlife/[cluster_name]/[znode]/acls
+
         get the children of a znode in a specific cluster: \
         http://[host]:[port]/wildlife/[cluster_name]/[znode]/children
         e.g. http://localhost:5000/wildlife/cluster01/znode1/znode2/children
@@ -145,14 +148,11 @@ def detail_cluster(cluster_name, znode):
     ``Response`` (json data):
         {
 
-         "read_only": null,
-         "auth_data": null,
          "connection": "CONNECTED",
          "hosts": "10.x.xx.xxx:2181,10.x.xx.xxx:2182",
          "name": "cluster01",
          "timeout": 10.0,
-         "randomize_hosts": true,
-         "default_acl": null
+         "randomize_hosts": true
 
         }
 
@@ -160,6 +160,7 @@ def detail_cluster(cluster_name, znode):
 
     _cluster_info = dict()
     _cluster_info.update(app.clusters[cluster_name].__dict__)
+    _cluster_info.pop("auth_data", None)
     _cluster_info["connection"] = app.managers[cluster_name]._client.state
     resp = Response(json.dumps(_cluster_info),
                     status=200,

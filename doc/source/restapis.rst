@@ -21,11 +21,6 @@ REST APIs
 
       http://[host]:[port]/wildlife/[cluster_name]
 
-    - get the acls of a znode in a specific cluster(see `rest.cluster_znode_acls
-      <./wildlife.rest.html#wildlife.rest.cluster_znode_acls>`_ for more details):
-
-      http://[host]:[port]wildlife/<cluster_name>/<path:znode>/acls
-
     - get the root children of a specific cluster(see `rest.cluster_list_children
       <./wildlife.rest.html#wildlife.rest.cluster_list_children>`_ for  more details):
 
@@ -37,6 +32,11 @@ REST APIs
       http://[host]:[port]/wildlife/[cluster_name]/[znode]
 
       e.g. http://localhost:5000/wildlife/cluster01/znode1/znode2/znode3
+
+    - get the acls of a znode in a specific cluster(see `rest.cluster_znode_acls
+      <./wildlife.rest.html#wildlife.rest.cluster_znode_acls>`_ for more details):
+
+      http://[host]:[port]wildlife/[cluster_name]/[path:znode]/acls
 
     - get the children of a znode in a specific cluster(see `rest.cluster_znode_children
       <./wildlife.rest.html#wildlife.rest.cluster_znode_children>`_ for more details):
