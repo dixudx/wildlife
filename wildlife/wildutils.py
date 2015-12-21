@@ -27,6 +27,23 @@ class Cluster(ConfigValue):
         return self.name
 
 
+class ACLConfig(ConfigValue):
+    """Configuration for ACL
+    """
+
+    def __init__(self, raw_data):
+        self.scheme = raw_data.get("scheme")
+        self.credential = raw_data.get("credential")
+        self.read = get_bool(raw_data.get("read", False))
+        self.write = get_bool(raw_data.get("write", False))
+        self.create = get_bool(raw_data.get("create", False))
+        self.delete = get_bool(raw_data.get("delete", False))
+        self.all = get_bool(raw_data.get("all", False))
+
+    def check_acl(self):
+        return self.scheme is not None and self.credential is not None
+
+
 def get_bool(v):
     if isinstance(v, bool):
         return v

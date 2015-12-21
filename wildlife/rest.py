@@ -176,6 +176,17 @@ def cluster_create_znode(cluster_name, znode):
 
     ``POST`` http://[host]:[port]/wildlife/[cluster_name]
 
+    ``Headers`` (if you want to add acls when creating these znodes):
+         {"scheme": "digest",
+          "credential": "user1,password1",
+          "read": True,
+          "write": False,
+          "create": False,
+          "delete": False,
+          "admin": True,
+          "all": False
+         }
+
     ``Content-Type``: "application/json" or "multipart/form-data"
 
     ``DATA``:
@@ -191,8 +202,7 @@ def cluster_create_znode(cluster_name, znode):
 
     """
 
-    _zclient_manager = app.managers[cluster_name]
-    _zclient = _zclient_manager._client
+    _zclient = get_client(cluster_name, request.headers)
     data = request_data(request)
     real_path_list = list()
     for (_znode, _zdata) in data.items():
@@ -298,8 +308,7 @@ def cluster_znode(cluster_name, znode):
 
     """
 
-    _zclient_manager = app.managers[cluster_name]
-    _zclient = _zclient_manager._client
+    _zclient = get_client(cluster_name, request.headers)
     if request.method == "GET":
         zdata = _zclient.get(znode)
         data = {"data": zdata[0],
@@ -376,8 +385,7 @@ def cluster_znode_acls(cluster_name, znode):
 
     """
 
-    _zclient_manager = app.managers[cluster_name]
-    _zclient = _zclient_manager._client
+    _zclient = get_client(cluster_name, request.headers)
     if request.method == "GET":
         acls = _zclient.get_acls(znode)[0]
         return make_response(str(acls),
@@ -392,17 +400,14 @@ def cluster_znode_acls(cluster_name, znode):
             acls_raw = eval(request.data)
             acls_list = list()
             for _acl_raw in acls_raw:
-                _scheme = _acl_raw.get("scheme")
-                _credential = _acl_raw.get("credential")
-                _read = wildutils.get_bool(_acl_raw.get("read", False))
-                _write = wildutils.get_bool(_acl_raw.get("write", False))
-                _create = wildutils.get_bool(_acl_raw.get("create", False))
-                _delete = wildutils.get_bool(_acl_raw.get("delete", False))
-                _all = wildutils.get_bool(_acl_raw.get("all", False))
-
-                _acl = make_acl(_scheme, _credential, read=_read,
-                                write=_write, create=_create,
-                                delete=_delete, all=_all)
+                _acl_config = wildutils.ACLConfig(_acl_raw)
+                _acl = make_acl(_acl_config.scheme,
+                                _acl_config.credential,
+                                read=_acl_config.read,
+                                write=_acl_config.write,
+                                create=_acl_config.create,
+                                delete=_acl_config.delete,
+                                all=_acl_config.all)
                 acls_list.append(_acl)
 
             zstat = _zclient.set_acls(znode, acls_list)
@@ -450,11 +455,27 @@ def cluster_znode_children(cluster_name, znode):
 
     """
 
-    _zclient_manager = app.managers[cluster_name]
-    _zclient = _zclient_manager._client
+    _zclient = get_client(cluster_name, request.headers)
     zchildren = _zclient.get_children(znode)
     return make_response(str(zchildren),
                          200)
+
+
+def get_client(cluster_name, headers):
+    zcl_mngr = app.managers[cluster_name]
+    acl_config = wildutils.ACLConfig(headers)
+    if not acl_config.check_acl():
+        zclient = zcl_mngr._client
+    else:
+        from kazoo.client import KazooClient
+        auth_data = (acl_config.scheme, acl_config.credential)
+        zclient = KazooClient(hosts=zcl_mngr.cluster.hosts,
+                              timeout=zcl_mngr.cluster.timeout,
+                              auth_data=auth_data,
+                              randomize_hosts=zcl_mngr.cluster.randomize_hosts,
+                              logger=zcl_mngr.log)
+
+    return zclient
 
 
 def request_data(request):
