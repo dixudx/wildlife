@@ -5,7 +5,6 @@ from wildlife import kz_exceptions
 import json
 import exceptions
 import functools
-from kazoo.security import make_acl
 from wildlife import wildutils
 
 
@@ -171,13 +170,16 @@ def detail_cluster(cluster_name, znode):
 @app.route("/wildlife/<cluster_name>", methods=["POST"],
            defaults={"znode": None})
 @cluster_znode_exception
-def cluster_create_znode(cluster_name, znode):
+def cluster_create_znode(cluster_name, znode, headers=None):
     """create a znode in a specific cluster
 
     ``POST`` http://[host]:[port]/wildlife/[cluster_name]
 
-    ``Headers`` (if you want to add acls when creating these znodes):
-         {"scheme": "digest",
+    ``Headers`` (optional, if you need want to create these znodes
+        with an acl):
+         {
+
+          "scheme": "digest",
           "credential": "user1,password1",
           "read": True,
           "write": False,
@@ -185,6 +187,7 @@ def cluster_create_znode(cluster_name, znode):
           "delete": False,
           "admin": True,
           "all": False
+
          }
 
     ``Content-Type``: "application/json" or "multipart/form-data"
@@ -202,12 +205,16 @@ def cluster_create_znode(cluster_name, znode):
 
     """
 
-    _zclient = get_client(cluster_name, request.headers)
+    _zclient = get_client(cluster_name,
+                          headers or request.headers)
+    acl_config = wildutils.ACLConfig(headers or request.headers)
     data = request_data(request)
     real_path_list = list()
     for (_znode, _zdata) in data.items():
-        _znodepath = _zclient.create(_znode, value=bytes(_zdata),
-                                     makepath=True, acl=None,
+        _znodepath = _zclient.create(_znode,
+                                     value=bytes(_zdata),
+                                     makepath=True,
+                                     acl=acl_config.make_acl(),
                                      ephemeral=False,
                                      sequence=False)
         real_path_list.append(_znodepath)
@@ -220,29 +227,48 @@ def cluster_create_znode(cluster_name, znode):
 @app.route("/wildlife/<cluster_name>/list", methods=["GET"],
            defaults={"znode": None})
 @cluster_znode_exception
-def cluster_list_children(cluster_name, znode):
+def cluster_list_children(cluster_name, znode, headers=None):
     """get the root children of a specific cluster
 
     ``GET`` http://[host]:[port]/wildlife/[cluster_name]/list
+
+    ``Headers`` (optional, if the znode you are accessing needs an acl):
+         {
+
+          "scheme": "digest",
+          "credential": "user1,password1"
+
+         }
 
     ``Response`` (string):
         [children_list]
 
     """
 
-    return cluster_znode_children(cluster_name, "/")
+    return cluster_znode_children(cluster_name,
+                                  "/",
+                                  headers=headers or request.headers)
 
 
 @app.route("/wildlife/<cluster_name>/<path:znode>",
            methods=["GET", "PUT", "DELETE"])
 @cluster_znode_exception
-def cluster_znode(cluster_name, znode):
+def cluster_znode(cluster_name, znode, headers=None):
     """get the znode data including the znodeStat, update the znode data
     and delete the znode
 
     ``GET`` http://[host]:[port]/wildlife/[cluster_name]/[znode]
 
+
     e.g. http://localhost:5000/wildlife/cluster01/znode1/znode2/znode3
+
+    ``Headers`` (optional, if the znode you are accessing needs an acl):
+         {
+
+          "scheme": "digest",
+          "credential": "user1,password1"
+
+         }
 
     ``Response`` (json data):
         {
@@ -274,6 +300,14 @@ def cluster_znode(cluster_name, znode):
     ``Content-Type``: "text/plain;charset=UTF-8", "application/json",
         "text/xml" or "multipart/form-data"
 
+    ``Headers`` (optional, if the znode you are accessing needs an acl):
+         {
+
+          "scheme": "digest",
+          "credential": "user1,password1"
+
+         }
+
     ``DATA``
 
     ``Response`` (json data):
@@ -303,12 +337,21 @@ def cluster_znode(cluster_name, znode):
 
     ``DELETE`` http://[host]:[port]/wildlife/[cluster_name]/[znode]
 
+    ``Headers`` (optional, if the znode you are accessing needs an acl):
+         {
+
+          "scheme": "digest",
+          "credential": "user1,password1"
+
+         }
+
     ``Response`` (string):
         Successfully Delete Znode [znode] from Cluster [cluster_name].
 
     """
 
-    _zclient = get_client(cluster_name, request.headers)
+    _zclient = get_client(cluster_name,
+                          headers or request.headers)
     if request.method == "GET":
         zdata = _zclient.get(znode)
         data = {"data": zdata[0],
@@ -336,13 +379,21 @@ def cluster_znode(cluster_name, znode):
 @app.route("/wildlife/<cluster_name>/<path:znode>/acls",
            methods=["GET", "PUT"])
 @cluster_znode_exception
-def cluster_znode_acls(cluster_name, znode):
+def cluster_znode_acls(cluster_name, znode, headers=None):
     """get or update the acls of a znode in a specific cluster
 
 
     ``GET`` http://[host]:[port]/wildlife/[cluster_name]/[znode]/acls
 
     e.g. http://localhost:5000/wildlife/cluster01/znode1/znode2/znode3/acls
+
+    ``Headers`` (optional, if the znode you are accessing needs an acl):
+         {
+
+          "scheme": "digest",
+          "credential": "user1,password1"
+
+         }
 
     ``Response`` (string):
         [ACL(perms=31, acl_list=['ALL'], id=Id(scheme=u'world', id=u'anyone'))]
@@ -351,6 +402,14 @@ def cluster_znode_acls(cluster_name, znode):
     ``PUT`` http://[host]:[port]/wildlife/[cluster_name]/[znode]/acls
 
     ``Content-Type``: "text/plain" or "text/xml"
+
+    ``Headers`` (optional, if the znode you are accessing needs an acl):
+         {
+
+          "scheme": "digest",
+          "credential": "user1,password1"
+
+         }
 
     ``DATA``:
 
@@ -385,7 +444,8 @@ def cluster_znode_acls(cluster_name, znode):
 
     """
 
-    _zclient = get_client(cluster_name, request.headers)
+    _zclient = get_client(cluster_name,
+                          headers or request.headers)
     if request.method == "GET":
         acls = _zclient.get_acls(znode)[0]
         return make_response(str(acls),
@@ -401,14 +461,7 @@ def cluster_znode_acls(cluster_name, znode):
             acls_list = list()
             for _acl_raw in acls_raw:
                 _acl_config = wildutils.ACLConfig(_acl_raw)
-                _acl = make_acl(_acl_config.scheme,
-                                _acl_config.credential,
-                                read=_acl_config.read,
-                                write=_acl_config.write,
-                                create=_acl_config.create,
-                                delete=_acl_config.delete,
-                                all=_acl_config.all)
-                acls_list.append(_acl)
+                acls_list.append(_acl_config.make_acl())
 
             zstat = _zclient.set_acls(znode, acls_list)
             data = {"znodeStat": wildutils.convert_zstat(zstat)}
@@ -420,7 +473,7 @@ def cluster_znode_acls(cluster_name, znode):
 
 @app.route("/wildlife/<cluster_name>/<path:znode>/data", methods=["GET"])
 @cluster_znode_exception
-def cluster_znode_data(cluster_name, znode):
+def cluster_znode_data(cluster_name, znode, headers=None):
     """get only the data of a znode in a specific cluster
 
 
@@ -428,12 +481,22 @@ def cluster_znode_data(cluster_name, znode):
 
     e.g. http://localhost:5000/wildlife/cluster01/znode1/znode2/znode3/data
 
+    ``Headers`` (optional, if the znode you are accessing needs an acl):
+         {
+
+          "scheme": "digest",
+          "credential": "user1,password1"
+
+         }
+
     ``Response`` (string):
         data for this znode
 
     """
 
-    zdata_resp = cluster_znode(cluster_name, znode)
+    zdata_resp = cluster_znode(cluster_name,
+                               znode,
+                               headers=headers)
     zdata = json.loads(zdata_resp.get_data())
     resp = Response(zdata["data"],
                     status=200,
@@ -443,19 +506,28 @@ def cluster_znode_data(cluster_name, znode):
 
 @app.route("/wildlife/<cluster_name>/<path:znode>/children", methods=["GET"])
 @cluster_znode_exception
-def cluster_znode_children(cluster_name, znode):
+def cluster_znode_children(cluster_name, znode, headers=None):
     """get the children of a znode in a specific cluster
 
     ``GET`` http://[host]:[port]/wildlife/[cluster_name]/[znode]/children
 
     e.g. http://localhost:5000/wildlife/cluster01/znode1/znode2/children
 
+    ``Headers`` (optional, if the znode you are accessing needs an acl):
+         {
+
+          "scheme": "digest",
+          "credential": "user1,password1"
+
+         }
+
     ``Response`` (string):
         [children_list]
 
     """
 
-    _zclient = get_client(cluster_name, request.headers)
+    _zclient = get_client(cluster_name,
+                          headers or request.headers)
     zchildren = _zclient.get_children(znode)
     return make_response(str(zchildren),
                          200)
