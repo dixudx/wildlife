@@ -12,7 +12,7 @@ A Flask-based Server Interface to Provide **REST APIs** for `Apache Zookeeper`_
 About This Project
 ------------------
 
-This project wildlife (I got this name inspired from the meaning of
+This project **wildlife** (I got this name inspired from the meaning of
 `Apache ZooKeeper`_), is a server interface, providing **REST APIs** for
 `Apache ZooKeeper`_.
 
@@ -39,7 +39,7 @@ Project documentation: https://readthedocs.org/projects/wildlife/
 How to Use & Configure
 ----------------------
 
-To **install wildlife**, simply run:
+To **install** wildlife, simply run:
 
 .. code-block:: bash
 
@@ -47,7 +47,7 @@ To **install wildlife**, simply run:
     $ cd wildlife
     $ python setup.py install
 
-To **configure wildlife**, simply run:
+To **configure** wildlife, simply run:
 
 .. code-block:: bash
 
@@ -56,6 +56,20 @@ To **configure wildlife**, simply run:
     $ vim wildlife.yml
 
 And then modify your configurations accordingly.
+
+After the configuration, you can **start** wildlife journey by running:
+
+.. code-block:: bash
+
+    $ python rest.py
+
+
+Important Notice
+----------------
+
+Please do `NOT` use "**list**", "**data**", "**children" and "**acls**"
+as znodes names, which have been preserved for the REST APIs usage and may
+result in conflicts if using.
 
 
 Public REST APIs

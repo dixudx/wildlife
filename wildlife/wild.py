@@ -95,9 +95,7 @@ class WildLife(threading.Thread):
         if c.hosts is None:
             raise exceptions.AttributeError("Invalid hosts for %s" % c.name)
         c.timeout = float(cluster.get("timeout", 10.0))
-        c.default_acl = cluster.get("default_acl", None)
-        c.auth_data = cluster.get("auth_data", None)
-        c.read_only = cluster.get("read_only", None)
+        c.auth_data = eval(cluster.get("auth_data", "set([])"))
         c.randomize_hosts = cluster.get("randomize_hosts", True)
         return c
 
@@ -142,9 +140,7 @@ class WildLife(threading.Thread):
                 or new_manager.name != old_manager.cluster.name
                 or new_manager.hosts != old_manager.cluster.hosts
                 or new_manager.timeout != old_manager.cluster.timeout
-                or new_manager.default_acl != old_manager.cluster.default_acl
-                or new_manager.auth_data != old_manager.cluster.auth_data
-                or new_manager.read_only != old_manager.cluster.read_only):
+                or new_manager.auth_data != old_manager.cluster.auth_data):
             return False
         return True
 
@@ -153,6 +149,6 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG,
                         format='%(asctime)s %(levelname)s %(name)s: '
                                '(%(threadName)-10s) %(message)s')
-    conf_p = "./wildlife.yml"
+    conf_p = "./config/wildlife.yml.example"
     wc = WildLife(conf_p)
     wc.start()

@@ -9,7 +9,6 @@ clusters:
     hosts: localhost:2181,localhost:2182
     timeout: 10.0
     randomize_hosts: True
+    auth_data: "[('digest', 'user1:password1'),('digest', 'user2:password2')]"
   - name: cluster02
     hosts: localhost:2183,localhost:2184
-    timeout: 10.0
-    randomize_hosts: True
